@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Descubre tus Valores — Mentes Abundantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #122341;
+    --navy-light: #1B3460;
+    --orange: #E8742A;
+    --orange-light: #F0863E;
+    --orange-glow: rgba(232, 116, 42, 0.15);
+    --green: #7A9A4A;
+    --cream: #FAF7F2;
+    --cream-dark: #EDE7DC;
+    --white: #FFFFFF;
+    --gray-50: #F5F2ED;
+    --gray-100: #E2DED6;
+    --gray-300: #B0A899;
+    --gray-500: #6B6458;
+    --gray-700: #3A352C;
+    --gray-900: #1A1814;
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --shadow-card: 0 4px 24px rgba(18, 35, 65, 0.06), 0 1px 4px rgba(18, 35, 65, 0.04);
+    --shadow-btn: 0 4px 15px rgba(18, 35, 65, 0.25);
+    --transition: 0.3s ease;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+    color: var(--gray-900);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* — Background decoration — */
+  .bg-decoration {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .bg-decoration .circle {
+    position: absolute; border-radius: 50%; opacity: 0.06;
+  }
+  .bg-decoration .c1 { width: 500px; height: 500px; background: var(--navy); top: -150px; right: -100px; }
+  .bg-decoration .c2 { width: 400px; height: 400px; background: var(--orange); bottom: -100px; left: -100px; }
+  .bg-decoration .c3 { width: 250px; height: 250px; background: var(--green); top: 50%; left: 60%; }
+
+  /* — Layout — */
+  .app {
+    position: relative; z-index: 1;
+    max-width: 680px; margin: 0 auto;
+    padding: 20px 16px 40px;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  /* — Header — */
+  .header { text-align: center; padding: 30px 0 10px; }
+  .logo-circle {
+    width: 80px; height: 80px; margin: 0 auto 16px;
+    border-radius: 50%; background: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 30px rgba(18, 35, 65, 0.3);
+    border: 3px solid var(--cream-dark);
+  }
+  .logo-circle span { font-size: 32px; }
+  .header h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px; font-weight: 700;
+    color: var(--navy);
+    line-height: 1.2; text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .header .subtitle {
+    font-size: 13px; color: var(--orange); font-weight: 600;
+    margin-top: 4px; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+
+  /* — Progress — */
+  .progress-container { margin: 24px 0 8px; }
+  .progress-labels {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--gray-500); margin-bottom: 6px; font-weight: 500;
+  }
+  .progress-bar {
+    height: 6px; background: var(--gray-100);
+    border-radius: 10px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 10px;
+    background: linear-gradient(90deg, var(--navy), var(--green), var(--orange));
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* — Section dots — */
+  .section-dots { display: flex; justify-content: center; gap: 8px; margin: 16px 0; }
+  .section-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 2px solid var(--gray-300); background: transparent;
+    cursor: default; transition: all var(--transition); padding: 0;
+  }
+  .section-dot.active {
+    background: var(--orange); border-color: var(--orange);
+    transform: scale(1.2); box-shadow: 0 0 0 4px var(--orange-glow);
+  }
+  .section-dot.completed { background: var(--navy); border-color: var(--navy); }
+
+  /* — Card — */
+  .card {
+    background: var(--white); border-radius: var(--radius-lg);
+    padding: 36px 32px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(226, 230, 239, 0.6);
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    animation: fadeSlideIn 0.4s ease-out; min-height: 420px;
+  }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* — Intro screen — */
+  .intro { text-align: center; }
+  .intro .icon-big { font-size: 48px; margin-bottom: 20px; }
+  .intro h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 30px; font-weight: 700; color: var(--navy);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .intro .tagline { color: var(--orange); font-weight: 600; font-size: 15px; margin-bottom: 24px; }
+  .intro .description {
+    background: linear-gradient(135deg, rgba(18,35,65,0.03), rgba(122,154,74,0.04));
+    border-radius: var(--radius-md); padding: 24px;
+    font-size: 14px; color: var(--gray-700); line-height: 1.7;
+    margin-bottom: 28px; border-left: 4px solid var(--green); text-align: left;
+  }
+  .intro .meta { font-size: 12px; color: var(--gray-500); margin-top: 12px; }
+
+  /* — Name screen — */
+  .name-section { text-align: center; }
+  .name-section h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px; font-weight: 600; color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .name-section .sub { color: var(--gray-500); font-size: 13px; margin-bottom: 28px; }
+  .name-fields { display: flex; flex-direction: column; gap: 16px; max-width: 400px; margin: 0 auto; }
+  .field-group { text-align: left; }
+  .field-group label {
+    font-size: 12px; font-weight: 600; color: var(--gray-700);
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; display: block;
+  }
+  .field-group input {
+    width: 100%; padding: 14px 18px; border-radius: var(--radius-sm);
+    border: 2px solid var(--gray-100);
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    color: var(--gray-900); background: var(--gray-50);
+    transition: all var(--transition); outline: none;
+  }
+  .field-group input::placeholder { color: var(--gray-300); }
+  .field-group input:focus {
+    border-color: var(--navy-light); background: var(--white);
+    box-shadow: 0 0 0 4px rgba(18, 35, 65, 0.1);
+  }
+
+  /* — Section headers — */
+  .section-header { text-align: center; padding: 20px 0; }
+  .icon-wrap {
+    width: 64px; height: 64px; border-radius: 20px;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 16px; font-size: 30px;
+  }
+  .icon-wrap.blue {
+    background: linear-gradient(135deg, rgba(18,35,65,0.08), rgba(27,52,96,0.08));
+    border: 1px solid rgba(18,35,65,0.12);
+  }
+  .icon-wrap.orange {
+    background: linear-gradient(135deg, rgba(232,116,42,0.08), rgba(240,134,62,0.08));
+    border: 1px solid rgba(232,116,42,0.12);
+  }
+  .icon-wrap.mixed {
+    background: linear-gradient(135deg, rgba(122,154,74,0.08), rgba(232,116,42,0.08));
+    border: 1px solid rgba(122,154,74,0.12);
+  }
+  .section-header h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 4px;
+  }
+  .section-header p { font-size: 13px; color: var(--gray-500); }
+
+  /* — Questions — */
+  .question-area { flex: 1; display: flex; flex-direction: column; }
+  .q-number {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--orange); margin-bottom: 12px;
+  }
+  .q-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 19px; font-weight: 600; color: var(--navy);
+    line-height: 1.4; margin-bottom: 24px;
+  }
+  .q-text .optional {
+    display: inline-block; font-family: 'DM Sans', sans-serif;
+    font-size: 11px; font-weight: 500;
+    color: var(--gray-500); background: var(--gray-50);
+    padding: 2px 10px; border-radius: 20px; margin-left: 6px; vertical-align: middle;
+  }
+  .answer-box {
+    width: 100%; min-height: 150px; padding: 18px 20px;
+    border: 2px solid var(--gray-100); border-radius: var(--radius-md);
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    color: var(--gray-900); background: var(--gray-50);
+    resize: vertical; outline: none; transition: all var(--transition); line-height: 1.6;
+  }
+  .answer-box::placeholder { color: var(--gray-300); }
+  .answer-box:focus {
+    border-color: var(--navy-light); background: var(--white);
+    box-shadow: 0 0 0 4px rgba(18, 35, 65, 0.08);
+  }
+  .char-count { font-size: 11px; color: var(--gray-300); text-align: right; margin-top: 6px; }
+
+  /* — Buttons — */
+  .nav-buttons { display: flex; gap: 12px; margin-top: 28px; }
+  .btn-back, .btn-next {
+    flex: 1; padding: 16px 24px; border-radius: 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    font-weight: 600; cursor: pointer; transition: all var(--transition); border: none;
+  }
+  .btn-back {
+    background: var(--gray-50); color: var(--gray-700);
+    border: 2px solid var(--gray-100);
+  }
+  .btn-back:hover { background: var(--gray-100); }
+  .btn-next {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: var(--white); box-shadow: var(--shadow-btn);
+  }
+  .btn-next:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(18, 35, 65, 0.35);
+  }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-start {
+    width: 100%; padding: 18px; border-radius: 14px; border: none;
+    background: linear-gradient(135deg, var(--orange), var(--orange-light));
+    color: var(--white); font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px; font-weight: 700; cursor: pointer;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    box-shadow: 0 4px 20px rgba(232, 116, 42, 0.35);
+    transition: all var(--transition);
+  }
+  .btn-start:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(232, 116, 42, 0.45);
+  }
+
+  /* — End screens — */
+  .end-screen { text-align: center; }
+  .end-screen .icon-big { font-size: 64px; margin-bottom: 20px; }
+  .end-screen h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px; font-weight: 700; color: var(--navy); margin-bottom: 8px;
+  }
+  .end-screen .msg { font-size: 15px; color: var(--gray-500); line-height: 1.7; margin-bottom: 28px; }
+  .status-msg {
+    margin-top: 16px; padding: 12px 20px; border-radius: var(--radius-sm);
+    font-size: 13px; text-align: center;
+  }
+  .status-msg.ok { background: rgba(122,154,74,0.1); color: var(--green); }
+  .status-msg.err { background: rgba(232,116,42,0.1); color: var(--orange); }
+  .status-msg.sending { background: rgba(18,35,65,0.06); color: var(--navy); }
+
+  /* — Responsive — */
+  @media (max-width: 600px) {
+    .card { padding: 28px 20px; min-height: 380px; }
+    .header h1 { font-size: 24px; }
+    .intro h2 { font-size: 26px; }
+    .q-text { font-size: 17px; }
+    .btn-start { font-size: 16px; padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-decoration">
+  <div class="circle c1"></div>
+  <div class="circle c2"></div>
+  <div class="circle c3"></div>
+</div>
+
+<div class="app" role="main">
+  <header class="header">
+    <div class="logo-circle" aria-hidden="true"><span>✨</span></div>
+    <h1>Mentes Abundantes</h1>
+    <div class="subtitle">Descubre tus Valores</div>
+  </header>
+
+  <div class="progress-container" id="progressArea" style="display:none" aria-label="Progreso de la encuesta">
+    <div class="progress-labels">
+      <span id="progressLabel">Pregunta 1 de 8</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="section-dots" id="dotsArea" style="display:none" aria-label="Secciones"></div>
+
+  <div class="card" id="cardArea"></div>
+</div>
+
+<script>
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzkHRqK2YCt8--c4LvObfIanASvt0xm6NinduMkm-gxiF5nA32CsEUI4E0MWuQYgBT/exec";
+
+var state = { screen: "intro", nombre: "", apellido: "", answers: {}, currentQ: 0 };
+
+var sections = [
+  { title: "Tus Valores Personales", icon: "\u{1F48E}", cls: "blue", desc: "Conecta con lo que te define como persona" },
+  { title: "Valores de tu Emprendimiento", icon: "\u{1F680}", cls: "orange", desc: "Descubre la esencia de tu negocio" },
+  { title: "La Conexi\u00f3n entre Ambos", icon: "\u{1F33F}", cls: "mixed", desc: "Encuentra la alineaci\u00f3n perfecta" }
+];
+
+var questions = [
+  { id: "q1", sec: 0, text: "\u00bfQu\u00e9 ten\u00edan en com\u00fan los momentos de tu vida en los que te has sentido m\u00e1s plena y orgullosa?", ph: "Piensa en esos momentos especiales..." },
+  { id: "q2", sec: 0, text: "Elige 3 palabras que definan lo innegociable en tu vida. \u00bfCu\u00e1les son?", ph: "Escribe tus 3 palabras..." },
+  { id: "q3", sec: 0, text: "\u00bfQu\u00e9 situaci\u00f3n o comportamiento te incomoda profundamente y por qu\u00e9?", ph: "Reflexiona sobre lo que no toleras..." },
+  { id: "q4", sec: 1, text: "M\u00e1s all\u00e1 de generar ingresos, \u00bfqu\u00e9 quieres que tu emprendimiento represente en el mundo?", ph: "El prop\u00f3sito profundo de tu negocio..." },
+  { id: "q5", sec: 1, text: "Si una clienta describiera tu marca a una amiga, \u00bfqu\u00e9 te gustar\u00eda que dijera?", ph: "Imagina esa conversaci\u00f3n..." },
+  { id: "q6", sec: 1, text: "\u00bfEn qu\u00e9 momento sientes que tu emprendimiento est\u00e1 completamente alineado contigo?", ph: "Describe ese momento..." },
+  { id: "q7", sec: 2, text: "\u00bfD\u00f3nde notas la mayor brecha entre tus valores personales y los de tu emprendimiento?", ph: "Identifica esa diferencia..." },
+  { id: "q8", sec: 2, text: "\u00bfHay algo m\u00e1s que quieras compartir sobre tus valores?", ph: "Espacio libre para ti...", opt: true }
+];
+
+function esc(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+function canNext() {
+  if (state.screen === "name") return state.nombre.trim() && state.apellido.trim();
+  if (state.screen === "question") {
+    var q = questions[state.currentQ];
+    return q.opt || (state.answers[q.id] || "").trim().length > 0;
+  }
+  return true;
+}
+
+function refreshBtn() {
+  var b = document.querySelector(".btn-next");
+  if (b) b.disabled = !canNext();
+}
+
+function updateProgress() {
+  var area = document.getElementById("progressArea");
+  var dots = document.getElementById("dotsArea");
+  var bar = document.querySelector(".progress-bar");
+  if (state.screen !== "question") { area.style.display = "none"; dots.style.display = "none"; return; }
+  area.style.display = "block"; dots.style.display = "flex";
+
+  var n = state.currentQ + 1, total = questions.length;
+  var pct = Math.round((n / total) * 100);
+  document.getElementById("progressLabel").textContent = "Pregunta " + n + " de " + total;
+  document.getElementById("progressPct").textContent = pct + "%";
+  document.getElementById("progressFill").style.width = pct + "%";
+  if (bar) { bar.setAttribute("aria-valuenow", pct); }
+
+  var curSec = questions[state.currentQ].sec;
+  dots.innerHTML = sections.map(function(s, i) {
+    var cls = i < curSec ? "completed" : i === curSec ? "active" : "";
+    return '<span class="section-dot ' + cls + '" title="' + esc(s.title) + '"></span>';
+  }).join("");
+}
+
+function render() {
+  var card = document.getElementById("cardArea");
+  updateProgress();
+
+  if (state.screen === "intro") {
+    card.innerHTML =
+      '<div class="intro">' +
+        '<div class="icon-big">✨</div>' +
+        '<h2>Descubre tus Valores</h2>' +
+        '<div class="tagline">Mentes Abundantes</div>' +
+        '<div class="description">' +
+          'Esta encuesta te ayudar\u00e1 a identificar tus <strong>valores personales</strong> y los ' +
+          '<strong>valores de tu emprendimiento</strong>. No hay respuestas correctas o incorrectas — ' +
+          'solo tu verdad. T\u00f3mate unos minutos para reflexionar con calma.' +
+        '</div>' +
+        '<button class="btn-start" onclick="state.screen=\'name\'; render()">Comenzar ✨</button>' +
+        '<div class="meta">\u23F1 Aproximadamente 10–15 minutos</div>' +
+      '</div>';
+    return;
+  }
+
+  if (state.screen === "name") {
+    card.innerHTML =
+      '<div class="name-section">' +
+        '<h2>\u00a1Hola! \u{1F44B}</h2>' +
+        '<div class="sub">Antes de comenzar, cu\u00e9ntanos qui\u00e9n eres</div>' +
+        '<div class="name-fields">' +
+          '<div class="field-group"><label for="fname">Nombre</label>' +
+            '<input id="fname" type="text" data-af placeholder="Tu nombre" value="' + esc(state.nombre) + '" oninput="state.nombre=this.value; refreshBtn()" /></div>' +
+          '<div class="field-group"><label for="lname">Apellido</label>' +
+            '<input id="lname" type="text" placeholder="Tu apellido" value="' + esc(state.apellido) + '" oninput="state.apellido=this.value; refreshBtn()" /></div>' +
+        '</div>' +
+        '<div class="nav-buttons">' +
+          '<button class="btn-back" onclick="state.screen=\'intro\'; render()">\u2190 Atr\u00e1s</button>' +
+          '<button class="btn-next" disabled onclick="state.screen=\'question\'; state.currentQ=0; render()">Siguiente \u2192</button>' +
+        '</div>' +
+      '</div>';
+    refreshBtn();
+    var af = card.querySelector("[data-af]"); if (af && !state.nombre) af.focus();
+    return;
+  }
+
+  if (state.screen === "question") {
+    var q = questions[state.currentQ];
+    var sec = sections[q.sec];
+    var prev = state.currentQ > 0 ? questions[state.currentQ - 1] : null;
+    var showHeader = !prev || prev.sec !== q.sec;
+    var isLast = state.currentQ === questions.length - 1;
+    var val = state.answers[q.id] || "";
+
+    var html = "";
+    if (showHeader) {
+      html += '<div class="section-header">' +
+        '<div class="icon-wrap ' + sec.cls + '">' + sec.icon + '</div>' +
+        '<h3>' + esc(sec.title) + '</h3><p>' + esc(sec.desc) + '</p></div>';
+    }
+    html += '<div class="question-area">' +
+      '<div class="q-number">Pregunta ' + (state.currentQ + 1) + ' de ' + questions.length + '</div>' +
+      '<div class="q-text">' + esc(q.text) + (q.opt ? ' <span class="optional">Opcional</span>' : '') + '</div>' +
+      '<textarea class="answer-box" data-af placeholder="' + esc(q.ph) + '" oninput="onAnswer(\'' + q.id + '\', this.value)">' + esc(val) + '</textarea>' +
+      '<div class="char-count">' + val.length + ' caracteres</div></div>';
+    html += '<div class="nav-buttons">' +
+      '<button class="btn-back" onclick="goBack()">\u2190 Atr\u00e1s</button>' +
+      '<button class="btn-next" onclick="goNext()">' + (isLast ? 'Enviar ✨' : 'Siguiente \u2192') + '</button></div>';
+    card.innerHTML = html;
+    refreshBtn();
+    var ta = card.querySelector("[data-af]"); if (ta) ta.focus();
+    return;
+  }
+
+  if (state.screen === "sending") {
+    card.innerHTML = '<div class="end-screen"><div class="icon-big">\u{1F4E4}</div>' +
+      '<h2>Enviando...</h2><div class="msg">Guardando tus respuestas, un momento por favor.</div>' +
+      '<div class="status-msg sending">Enviando respuestas...</div></div>';
+    return;
+  }
+
+  if (state.screen === "done") {
+    card.innerHTML = '<div class="end-screen"><div class="icon-big">\u{1F389}</div>' +
+      '<h2>\u00a1Gracias, ' + esc(state.nombre) + '!</h2>' +
+      '<div class="msg">Tus respuestas han sido guardadas exitosamente.<br>Este es un paso muy importante en tu camino emprendedor.</div>' +
+      '<div class="status-msg ok">\u2713 Respuestas guardadas correctamente</div></div>';
+    return;
+  }
+
+  if (state.screen === "error") {
+    card.innerHTML = '<div class="end-screen"><div class="icon-big">\u26A0\uFE0F</div>' +
+      '<h2>Hubo un problema</h2><div class="msg">No pudimos guardar tus respuestas. Por favor intenta de nuevo.</div>' +
+      '<div class="status-msg err">Error al enviar. Revisa tu conexi\u00f3n.</div>' +
+      '<br><button class="btn-start" onclick="submit()">Reintentar</button></div>';
+    return;
+  }
+}
+
+function onAnswer(id, val) {
+  state.answers[id] = val;
+  var cc = document.querySelector(".char-count");
+  if (cc) cc.textContent = val.length + " caracteres";
+  refreshBtn();
+}
+
+function goBack() {
+  if (state.currentQ > 0) state.currentQ--;
+  else state.screen = "name";
+  render();
+}
+
+function goNext() {
+  if (state.currentQ < questions.length - 1) { state.currentQ++; render(); }
+  else submit();
+}
+
+async function submit() {
+  state.screen = "sending"; render();
+
+  var payload = { timestamp: new Date().toLocaleString("es-ES"), nombre: state.nombre, apellido: state.apellido };
+  questions.forEach(function(q) { payload[q.id] = state.answers[q.id] || ""; });
+
+  if (!SCRIPT_URL) { console.log("No script URL. Data:", payload); state.screen = "done"; render(); return; }
+
+  try {
+    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) });
+    state.screen = "done"; render();
+  } catch (e) {
+    console.error(e); state.screen = "error"; render();
+  }
+}
+
+render();
+</script>
+</body>
+</html>
