@@ -1,0 +1,566 @@
+import { useState, useEffect, useRef } from "react";
+
+// ─── Brand ───
+const C = {
+  navy: "#1B2A4A", orange: "#CC5E22", olive: "#7A9455",
+  gold: "#C9A84C", cream: "#F0E8D4", white: "#FFFFFF",
+};
+
+// ─── Archetype Data ───
+const ARCHETYPES = {
+  creadora: { emoji: "🎨", color: "#CC5E22", title: "La Creadora", tagline: "Tu superpoder es transformar ideas en realidad", desc: "Ves el mundo como un lienzo de posibilidades. Tu mente está constantemente generando ideas, conceptos y visiones. Necesitas libertad creativa y te frustras con la rigidez." },
+  sabia: { emoji: "🦉", color: "#1B2A4A", title: "La Sabia", tagline: "Tu superpoder es la claridad y la estrategia", desc: "Analizas, investigas y planificas antes de actuar. Tu fortaleza está en la profundidad de tu conocimiento. Necesitas entender el 'por qué' antes del 'cómo'." },
+  guerrera: { emoji: "⚔️", color: "#8B4513", title: "La Guerrera", tagline: "Tu superpoder es la acción y la determinación", desc: "Cuando decides algo, vas con todo. No le temes a los retos y te motiva la competencia sana. Tu energía es contagiosa y tu resiliencia admirable." },
+  cuidadora: { emoji: "🌿", color: "#7A9455", title: "La Cuidadora", tagline: "Tu superpoder es conectar y servir desde el corazón", desc: "Tu motivación más profunda es ayudar a otros. Construyes comunidad de forma natural y la gente confía en ti. Tu reto es poner tus propias necesidades primero." },
+  maga: { emoji: "✨", color: "#7B2D8E", title: "La Maga", tagline: "Tu superpoder es la transformación y la visión", desc: "Ves posibilidades donde otros ven obstáculos. Tienes una capacidad innata para reinventarte y ayudar a otros a hacer lo mismo. Tu intuición es tu brújula." },
+  exploradora: { emoji: "🧭", color: "#C9A84C", title: "La Exploradora", tagline: "Tu superpoder es la adaptabilidad y la curiosidad", desc: "Te aburres con la rutina y buscas constantemente nuevas experiencias. Tu versatilidad es tu mayor activo, pero necesitas anclar tu energía en un propósito claro." },
+};
+
+// ─── Questions ───
+const SECTIONS = [
+  {
+    id: "intro", title: "Bienvenida", subtitle: "", questions: [],
+  },
+  {
+    id: "identidad", title: "Identidad y Visión", subtitle: "Cómo te ves y cómo quieres ser vista",
+    questions: [
+      { id: "q1", text: "Cuando piensas en tu versión más exitosa dentro de 3 años, ¿qué ves?", type: "choice", options: [
+        { text: "Un negocio creativo que refleja mi esencia", archetype: "creadora" },
+        { text: "Una marca reconocida por su conocimiento y autoridad", archetype: "sabia" },
+        { text: "Un imperio que construí desde cero con disciplina", archetype: "guerrera" },
+        { text: "Una comunidad de personas a las que he transformado", archetype: "cuidadora" },
+        { text: "Libertad total para vivir y trabajar en mis términos", archetype: "exploradora" },
+        { text: "Ser la persona que otros buscan cuando necesitan un cambio profundo", archetype: "maga" },
+      ]},
+      { id: "q2", text: "¿Qué palabra te define mejor cuando estás en tu mejor momento?", type: "choice", options: [
+        { text: "Inspirada", archetype: "creadora" },
+        { text: "Enfocada", archetype: "sabia" },
+        { text: "Imparable", archetype: "guerrera" },
+        { text: "Conectada", archetype: "cuidadora" },
+        { text: "Libre", archetype: "exploradora" },
+        { text: "Poderosa", archetype: "maga" },
+      ]},
+      { id: "q3", text: "Si tuvieras que elegir una frase para tu marca, ¿cuál sería?", type: "choice", options: [
+        { text: "\"Diseño experiencias que transforman\"", archetype: "creadora" },
+        { text: "\"Te enseño el camino con claridad\"", archetype: "sabia" },
+        { text: "\"Los resultados hablan por sí solos\"", archetype: "guerrera" },
+        { text: "\"Crecemos juntas\"", archetype: "cuidadora" },
+        { text: "\"Atrévete a romper los moldes\"", archetype: "exploradora" },
+        { text: "\"Tu transformación empieza aquí\"", archetype: "maga" },
+      ]},
+    ],
+  },
+  {
+    id: "dinero", title: "Tu Relación con el Dinero", subtitle: "Cómo piensas, sientes y actúas con la abundancia",
+    questions: [
+      { id: "q4", text: "¿Cuál de estas frases resuena más contigo sobre el dinero?", type: "choice", options: [
+        { text: "El dinero es energía creativa — fluye cuando hago lo que amo", archetype: "creadora" },
+        { text: "El dinero es el resultado de decisiones inteligentes", archetype: "sabia" },
+        { text: "El dinero se gana con trabajo duro y constancia", archetype: "guerrera" },
+        { text: "Ganar dinero está bien, siempre que ayude a otros también", archetype: "cuidadora" },
+        { text: "El dinero me da libertad para vivir como quiero", archetype: "exploradora" },
+        { text: "Merezco abundancia y estoy lista para recibirla", archetype: "maga" },
+      ]},
+      { id: "q5", text: "Cuando recibes un ingreso inesperado, ¿cuál es tu primer instinto?", type: "choice", options: [
+        { text: "Invertir en algo que me inspire (curso, herramienta, experiencia)", archetype: "creadora" },
+        { text: "Ahorrarlo y planificar cómo usarlo estratégicamente", archetype: "sabia" },
+        { text: "Reinvertirlo en mi negocio para crecer más rápido", archetype: "guerrera" },
+        { text: "Compartirlo o usarlo para algo que beneficie a mi familia", archetype: "cuidadora" },
+        { text: "Darme un gusto o una aventura que tenía pendiente", archetype: "exploradora" },
+        { text: "Sentir gratitud y confiar en que viene más", archetype: "maga" },
+      ]},
+      { id: "q6", text: "¿Cuál es tu mayor bloqueo con el dinero?", type: "open", placeholder: "Sé honesta — esto es confidencial y nos ayuda muchísimo a personalizar tu proceso." },
+    ],
+  },
+  {
+    id: "bloqueos", title: "Miedos y Patrones", subtitle: "Lo que te frena y lo que te impulsa",
+    questions: [
+      { id: "q7", text: "¿Cuál de estos miedos te visita con más frecuencia?", type: "choice", options: [
+        { text: "Que mi trabajo no sea lo suficientemente bueno o único", archetype: "creadora" },
+        { text: "Tomar una decisión equivocada por falta de información", archetype: "sabia" },
+        { text: "Fracasar después de haberlo dado todo", archetype: "guerrera" },
+        { text: "Que me vean como egoísta por priorizar mi negocio", archetype: "cuidadora" },
+        { text: "Quedarme atrapada en algo que no me hace feliz", archetype: "exploradora" },
+        { text: "No ser capaz de lograr la transformación que deseo", archetype: "maga" },
+      ]},
+      { id: "q8", text: "Cuando algo no sale como esperabas, ¿cuál es tu patrón?", type: "choice", options: [
+        { text: "Me desmotivo y abandono el proyecto por uno nuevo", archetype: "creadora" },
+        { text: "Analizo qué salió mal hasta encontrar la causa", archetype: "sabia" },
+        { text: "Me frustro pero vuelvo a intentar con más fuerza", archetype: "guerrera" },
+        { text: "Me culpo y pienso que debí haber hecho más por otros", archetype: "cuidadora" },
+        { text: "Lo dejo ir rápido y busco otra oportunidad", archetype: "exploradora" },
+        { text: "Me detengo a reflexionar y busco el aprendizaje profundo", archetype: "maga" },
+      ]},
+      { id: "q9", text: "¿Qué patrón de tu infancia o pasado crees que todavía afecta cómo te muestras en tu emprendimiento?", type: "open", placeholder: "Puede ser algo que te dijeron, que observaste, o que viviste..." },
+      { id: "q10", text: "Si pudieras soltar UNA creencia limitante hoy, ¿cuál sería?", type: "open", placeholder: "Escribe la primera que venga a tu mente..." },
+    ],
+  },
+  {
+    id: "comunicacion", title: "Estilo de Comunicación", subtitle: "Cómo aprendes, procesas y te expresas",
+    questions: [
+      { id: "q11", text: "¿Cómo prefieres aprender algo nuevo?", type: "choice", options: [
+        { text: "Viendo ejemplos visuales e inspiración", archetype: "creadora" },
+        { text: "Leyendo, investigando y tomando notas", archetype: "sabia" },
+        { text: "Haciendo — aprendo en la práctica", archetype: "guerrera" },
+        { text: "Conversando y escuchando experiencias de otros", archetype: "cuidadora" },
+        { text: "Experimentando por mi cuenta a mi ritmo", archetype: "exploradora" },
+        { text: "A través de reflexión profunda e intuición", archetype: "maga" },
+      ]},
+      { id: "q12", text: "En una sesión de coaching, ¿qué necesitas más?", type: "choice", options: [
+        { text: "Espacio para hacer lluvia de ideas y explorar opciones", archetype: "creadora" },
+        { text: "Datos, frameworks y un plan paso a paso", archetype: "sabia" },
+        { text: "Retos claros, accountability y plazos", archetype: "guerrera" },
+        { text: "Sentirme escuchada y comprendida primero", archetype: "cuidadora" },
+        { text: "Flexibilidad y que no se sienta rígido", archetype: "exploradora" },
+        { text: "Que me ayuden a ver lo que no puedo ver sola", archetype: "maga" },
+      ]},
+      { id: "q13", text: "Cuando te sientes abrumada, ¿qué haces?", type: "choice", options: [
+        { text: "Me desconecto y busco algo creativo para recargar", archetype: "creadora" },
+        { text: "Hago una lista y organizo mis pensamientos", archetype: "sabia" },
+        { text: "Me pongo en acción — hacer algo me calma", archetype: "guerrera" },
+        { text: "Hablo con alguien de confianza", archetype: "cuidadora" },
+        { text: "Salgo, camino, cambio de ambiente", archetype: "exploradora" },
+        { text: "Medito, escribo en mi diario o hago algo introspectivo", archetype: "maga" },
+      ]},
+    ],
+  },
+  {
+    id: "cierre", title: "Cierre", subtitle: "Últimas reflexiones",
+    questions: [
+      { id: "q14", text: "¿Qué es lo que MÁS te emociona de empezar este programa?", type: "open", placeholder: "Cuéntanos lo que te tiene emocionada..." },
+      { id: "q15", text: "¿Hay algo que te preocupe o que quieras que sepamos antes de comenzar?", type: "open", placeholder: "Cualquier cosa que nos ayude a acompañarte mejor..." },
+    ],
+  },
+  { id: "result", title: "Tu Perfil", subtitle: "", questions: [] },
+];
+
+// ─── Scoring Logic ───
+function calculateArchetype(answers) {
+  const scores = {};
+  Object.keys(ARCHETYPES).forEach(k => scores[k] = 0);
+  SECTIONS.forEach(sec => {
+    sec.questions.forEach(q => {
+      if (q.type === "choice" && answers[q.id]) {
+        const opt = q.options.find(o => o.text === answers[q.id]);
+        if (opt) scores[opt.archetype] = (scores[opt.archetype] || 0) + 1;
+      }
+    });
+  });
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  return { primary: sorted[0][0], secondary: sorted[1][0], scores };
+}
+
+function getOpenAnswers(answers) {
+  const open = {};
+  SECTIONS.forEach(sec => {
+    sec.questions.forEach(q => {
+      if (q.type === "open" && answers[q.id]) open[q.id] = { label: q.text, answer: answers[q.id] };
+    });
+  });
+  return open;
+}
+
+// ─── API Calls ───
+async function generateProfile(answers, archResult) {
+  const primary = ARCHETYPES[archResult.primary];
+  const secondary = ARCHETYPES[archResult.secondary];
+  const openAnswers = getOpenAnswers(answers);
+  const openText = Object.values(openAnswers).map(o => `${o.label}\n→ ${o.answer}`).join("\n\n");
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      messages: [{ role: "user", content: `Eres una coach experta en desarrollo personal y branding. Analiza estas respuestas de una participante del programa Mentes Abundantes y genera un perfil personalizado en español.
+
+ARQUETIPO PRIMARIO: ${primary.title} — ${primary.tagline}
+ARQUETIPO SECUNDARIO: ${secondary.title} — ${secondary.tagline}
+
+RESPUESTAS ABIERTAS:
+${openText}
+
+Genera un JSON con EXACTAMENTE esta estructura (sin markdown, sin backticks, solo JSON puro):
+{
+  "resumen": "Un párrafo de 3-4 oraciones describiendo la combinación única de arquetipos de esta persona y qué la hace especial",
+  "fortalezas": ["fortaleza 1", "fortaleza 2", "fortaleza 3"],
+  "areas_trabajo": ["área 1", "área 2", "área 3"],
+  "consejo_coaching": "Un párrafo de 2-3 oraciones con recomendaciones específicas para Krystina y Franklin sobre cómo trabajar con esta participante",
+  "mensaje_personal": "Un mensaje motivacional de 2-3 oraciones dirigido directamente a la participante usando tú"
+}` }],
+    }),
+  });
+  const data = await res.json();
+  const text = data.content?.find(b => b.type === "text")?.text || "";
+  try {
+    return JSON.parse(text.replace(/```json|```/g, "").trim());
+  } catch {
+    return null;
+  }
+}
+
+async function saveToNotion(answers, archResult, profile, participantName) {
+  const primary = ARCHETYPES[archResult.primary];
+  const secondary = ARCHETYPES[archResult.secondary];
+  const openAnswers = getOpenAnswers(answers);
+  const today = new Date().toISOString().split("T")[0];
+
+  let md = `# Perfil de Arquetipo — ${participantName}\n\n`;
+  md += `**Fecha:** ${today}\n\n`;
+  md += `## Resultado\n\n`;
+  md += `**Arquetipo Primario:** ${primary.emoji} ${primary.title}\n${primary.tagline}\n\n`;
+  md += `**Arquetipo Secundario:** ${secondary.emoji} ${secondary.title}\n${secondary.tagline}\n\n`;
+  if (profile) {
+    md += `## Análisis Personalizado\n\n${profile.resumen}\n\n`;
+    md += `### Fortalezas\n${profile.fortalezas?.map(f => `- ${f}`).join("\n")}\n\n`;
+    md += `### Áreas de Trabajo\n${profile.areas_trabajo?.map(a => `- ${a}`).join("\n")}\n\n`;
+    md += `### Recomendaciones para Coaching\n${profile.consejo_coaching}\n\n`;
+  }
+  md += `## Respuestas Abiertas\n\n`;
+  Object.values(openAnswers).forEach(o => { md += `**${o.label}**\n${o.answer}\n\n`; });
+  md += `---\n*Generado automáticamente por el Test de Arquetipo — Mentes Abundantes*`;
+
+  await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514", max_tokens: 1000,
+      messages: [{ role: "user", content: `Create a new page in Notion under parent page ID "2b73cc7cabbe806cba68f50a8c394ed4" with the title "${primary.emoji} Perfil Arquetipo — ${participantName} (${today})" and this markdown content:\n\n${md}` }],
+      mcp_servers: [{ type: "url", url: "https://mcp.notion.com/mcp", name: "notion" }],
+    }),
+  });
+}
+
+async function notifyEmail(archResult, profile, participantName) {
+  const primary = ARCHETYPES[archResult.primary];
+  const secondary = ARCHETYPES[archResult.secondary];
+  const today = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+
+  const body = `Hola Krystina y Franklin,\n\n${participantName} completó el Test de Arquetipo.\n\nResultado:\n• Primario: ${primary.emoji} ${primary.title} — ${primary.tagline}\n• Secundario: ${secondary.emoji} ${secondary.title} — ${secondary.tagline}\n\n${profile?.consejo_coaching || ""}\n\nEl perfil completo fue guardado en Notion dentro del HQ.\n\nFecha: ${today}`;
+
+  await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514", max_tokens: 1000,
+      messages: [{ role: "user", content: `Create a Gmail draft with subject "✨ Nuevo Perfil de Arquetipo: ${participantName} — ${primary.title}" and body:\n\n${body}` }],
+      mcp_servers: [{ type: "url", url: "https://gmail.mcp.claude.com/mcp", name: "gmail" }],
+    }),
+  });
+}
+
+// ─── UI Components ───
+function ChoiceOption({ text, selected, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      display: "block", width: "100%", textAlign: "left", padding: "14px 18px",
+      borderRadius: 14, cursor: "pointer", transition: "all 0.25s ease",
+      border: selected ? `2px solid ${C.orange}` : "2px solid rgba(27,42,74,0.08)",
+      background: selected ? "rgba(204,94,34,0.05)" : "rgba(255,255,255,0.7)",
+      color: C.navy, fontSize: 15, fontFamily: "'Source Sans 3', sans-serif",
+      lineHeight: 1.5, fontWeight: selected ? 600 : 400,
+      transform: selected ? "scale(1.01)" : "scale(1)",
+      boxShadow: selected ? "0 2px 12px rgba(204,94,34,0.12)" : "none",
+    }}>
+      <span style={{ display: "inline-block", width: 22, height: 22, borderRadius: "50%", border: `2px solid ${selected ? C.orange : "rgba(27,42,74,0.2)"}`, verticalAlign: "middle", marginRight: 12, position: "relative", top: -1, transition: "all 0.2s", background: selected ? C.orange : "transparent", textAlign: "center", lineHeight: "18px", fontSize: 13, color: "#fff" }}>
+        {selected ? "✓" : ""}
+      </span>
+      {text}
+    </button>
+  );
+}
+
+function ArchetypeCard({ archKey, label, isMain }) {
+  const a = ARCHETYPES[archKey];
+  if (!a) return null;
+  return (
+    <div style={{
+      padding: isMain ? "28px 24px" : "20px 24px", borderRadius: 20,
+      background: isMain ? `linear-gradient(135deg, ${a.color}11, ${a.color}08)` : "rgba(27,42,74,0.03)",
+      border: `1.5px solid ${a.color}${isMain ? "33" : "18"}`,
+      marginBottom: 16, transition: "all 0.4s ease",
+      animation: "cardIn 0.6s ease both",
+    }}>
+      <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: a.color, marginBottom: 8, fontFamily: "'Source Sans 3', sans-serif" }}>{label}</div>
+      <div style={{ fontSize: isMain ? 36 : 28, marginBottom: 4 }}>{a.emoji}</div>
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: isMain ? 28 : 22, fontWeight: 700, color: C.navy, marginBottom: 4 }}>{a.title}</div>
+      <div style={{ fontSize: 15, fontWeight: 600, color: a.color, marginBottom: 10, fontFamily: "'Source Sans 3', sans-serif" }}>{a.tagline}</div>
+      <div style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(27,42,74,0.7)", fontFamily: "'Source Sans 3', sans-serif" }}>{a.desc}</div>
+    </div>
+  );
+}
+
+// ─── Main App ───
+export default function App() {
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [anim, setAnim] = useState(false);
+  const [archResult, setArchResult] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [phase, setPhase] = useState("quiz"); // quiz | analyzing | result
+  const [statusMsgs, setStatusMsgs] = useState([]);
+  const ref = useRef(null);
+
+  const sec = SECTIONS[step];
+  const isIntro = step === 0;
+  const isResult = step === SECTIONS.length - 1;
+  const total = SECTIONS.length;
+
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.href = "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600;700&display=swap";
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
+  }, []);
+
+  const go = (t) => {
+    if (anim) return;
+    setAnim(true);
+    setTimeout(() => { setStep(t); setAnim(false); ref.current?.scrollTo({ top: 0, behavior: "smooth" }); }, 280);
+  };
+
+  const canProceed = () => {
+    if (isIntro || isResult) return true;
+    return sec.questions.every(q => {
+      if (q.type === "open") return true;
+      return !!answers[q.id];
+    });
+  };
+
+  const handleNext = async () => {
+    if (step === SECTIONS.length - 2) {
+      // Last question section → analyze
+      go(step + 1);
+      setPhase("analyzing");
+      const result = calculateArchetype(answers);
+      setArchResult(result);
+
+      setStatusMsgs(["Analizando tu perfil con IA..."]);
+      try {
+        const p = await generateProfile(answers, result);
+        setProfile(p);
+        setStatusMsgs(s => [...s, "✓ Perfil generado"]);
+      } catch { setStatusMsgs(s => [...s, "⚠ Perfil generado sin IA"]); }
+
+      setStatusMsgs(s => [...s, "Guardando en Notion..."]);
+      try {
+        await saveToNotion(answers, result, profile, answers.nombre || "Participante");
+        setStatusMsgs(s => [...s, "✓ Guardado en Notion"]);
+      } catch { setStatusMsgs(s => [...s, "⚠ Error guardando en Notion"]); }
+
+      setStatusMsgs(s => [...s, "Notificando por email..."]);
+      try {
+        await notifyEmail(result, profile, answers.nombre || "Participante");
+        setStatusMsgs(s => [...s, "✓ Email notificado"]);
+      } catch { setStatusMsgs(s => [...s, "⚠ Error en email"]); }
+
+      setPhase("result");
+    } else {
+      go(step + 1);
+    }
+  };
+
+  const pct = (step / (total - 1)) * 100;
+
+  return (
+    <div style={{ minHeight: "100vh", background: `radial-gradient(ellipse at 20% 0%, ${C.cream} 0%, #fefcf8 50%, #fff 100%)`, fontFamily: "'Source Sans 3', sans-serif", color: C.navy }}>
+      <style>{`
+        @keyframes cardIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes pulse { 0%,100% { opacity:0.4; } 50% { opacity:1; } }
+        @keyframes spin2 { to { transform:rotate(360deg); } }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ position: "sticky", top: 0, zIndex: 10, backdropFilter: "blur(16px)", background: "rgba(254,252,248,0.88)", borderBottom: "1px solid rgba(27,42,74,0.05)" }}>
+        <div style={{ maxWidth: 600, margin: "0 auto", padding: "18px 24px 14px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 14 }}>
+            <div>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 700, fontSize: 20, color: C.navy }}>Mentes Abundantes</div>
+              <div style={{ fontSize: 11, color: C.olive, fontWeight: 600, letterSpacing: 2.5, textTransform: "uppercase", marginTop: 1 }}>Test de Arquetipo</div>
+            </div>
+            {!isIntro && !isResult && (
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.orange }}>{step} / {total - 2}</div>
+            )}
+          </div>
+          <div style={{ height: 3, background: "rgba(27,42,74,0.06)", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ width: `${pct}%`, height: "100%", background: `linear-gradient(90deg, ${C.orange}, ${C.gold})`, borderRadius: 2, transition: "width 0.7s cubic-bezier(0.4,0,0.2,1)" }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div ref={ref} style={{ maxWidth: 600, margin: "0 auto", padding: "36px 24px 140px", opacity: anim ? 0 : 1, transform: anim ? "translateY(16px)" : "translateY(0)", transition: "all 0.28s ease" }}>
+
+        {/* INTRO */}
+        {isIntro && (
+          <div style={{ textAlign: "center", paddingTop: 32 }}>
+            <div style={{ width: 90, height: 90, borderRadius: "50%", margin: "0 auto 28px", background: `conic-gradient(from 45deg, ${C.orange}, ${C.gold}, ${C.olive}, ${C.navy}, ${C.orange})`, display: "flex", alignItems: "center", justifyContent: "center", padding: 3 }}>
+              <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: C.cream, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36 }}>✦</div>
+            </div>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 700, color: C.navy, margin: "0 0 8px", lineHeight: 1.15 }}>Descubre tu Arquetipo</h1>
+            <p style={{ fontSize: 16, color: "rgba(27,42,74,0.55)", lineHeight: 1.75, maxWidth: 440, margin: "0 auto 20px" }}>
+              Este test nos ayudará a entender cómo piensas, sientes y te comunicas — para que tu acompañamiento sea verdaderamente personalizado.
+            </p>
+            <div style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap", marginBottom: 28 }}>
+              {[["🧠","Mentalidad"],["💰","Dinero"],["💬","Comunicación"],["🔮","Arquetipo"]].map(([e,t]) => (
+                <div key={t} style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 24, marginBottom: 4 }}>{e}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(27,42,74,0.4)", letterSpacing: 0.5 }}>{t}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ background: "rgba(122,148,85,0.08)", padding: "10px 20px", borderRadius: 12, display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, color: C.olive, fontWeight: 500 }}>
+              ⏱ 8-12 minutos
+            </div>
+
+            {/* Name input on intro */}
+            <div style={{ marginTop: 36, textAlign: "left", maxWidth: 380, marginLeft: "auto", marginRight: "auto" }}>
+              <label style={{ fontSize: 14, fontWeight: 600, color: C.navy, marginBottom: 8, display: "block" }}>Tu nombre completo</label>
+              <input type="text" value={answers.nombre || ""} onChange={e => setAnswers(a => ({ ...a, nombre: e.target.value }))} placeholder="Para personalizar tu resultado"
+                style={{ width: "100%", padding: "13px 18px", borderRadius: 12, border: "1.5px solid rgba(27,42,74,0.1)", fontSize: 16, color: C.navy, fontFamily: "'Source Sans 3', sans-serif", outline: "none", background: "#fff", boxSizing: "border-box", transition: "border-color 0.2s" }}
+                onFocus={e => e.target.style.borderColor = C.orange}
+                onBlur={e => e.target.style.borderColor = "rgba(27,42,74,0.1)"}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* QUESTIONS */}
+        {!isIntro && !isResult && (
+          <>
+            <div style={{ marginBottom: 32 }}>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 700, color: C.navy, margin: "0 0 6px" }}>{sec.title}</h2>
+              <p style={{ fontSize: 14, color: "rgba(27,42,74,0.45)", margin: 0 }}>{sec.subtitle}</p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 36 }}>
+              {sec.questions.map((q, qi) => (
+                <div key={q.id} style={{ animation: `fadeUp 0.5s ease ${qi * 0.08}s both` }}>
+                  <label style={{ display: "block", fontSize: 16, fontWeight: 600, color: C.navy, marginBottom: 12, lineHeight: 1.5 }}>
+                    {q.text}
+                  </label>
+                  {q.type === "choice" && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {q.options.map(opt => (
+                        <ChoiceOption key={opt.text} text={opt.text} selected={answers[q.id] === opt.text} onClick={() => setAnswers(a => ({ ...a, [q.id]: opt.text }))} />
+                      ))}
+                    </div>
+                  )}
+                  {q.type === "open" && (
+                    <>
+                      <textarea value={answers[q.id] || ""} onChange={e => setAnswers(a => ({ ...a, [q.id]: e.target.value }))} placeholder={q.placeholder} rows={3}
+                        style={{ width: "100%", padding: "14px 18px", borderRadius: 14, border: "1.5px solid rgba(27,42,74,0.1)", fontSize: 15, color: C.navy, fontFamily: "'Source Sans 3', sans-serif", outline: "none", background: "rgba(255,255,255,0.7)", resize: "vertical", minHeight: 80, boxSizing: "border-box", transition: "border-color 0.2s" }}
+                        onFocus={e => e.target.style.borderColor = C.orange}
+                        onBlur={e => e.target.style.borderColor = "rgba(27,42,74,0.1)"}
+                      />
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* RESULT */}
+        {isResult && (
+          <div>
+            {phase === "analyzing" && (
+              <div style={{ textAlign: "center", paddingTop: 60 }}>
+                <div style={{ width: 64, height: 64, margin: "0 auto 24px", border: `3px solid ${C.cream}`, borderTopColor: C.orange, borderRadius: "50%", animation: "spin2 0.8s linear infinite" }} />
+                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 700, color: C.navy, marginBottom: 20 }}>Analizando tu perfil...</h2>
+                <div style={{ maxWidth: 340, margin: "0 auto", textAlign: "left" }}>
+                  {statusMsgs.map((m, i) => (
+                    <div key={i} style={{ padding: "8px 14px", marginBottom: 6, borderRadius: 10, fontSize: 14, fontWeight: 500, background: m.startsWith("✓") ? "rgba(122,148,85,0.08)" : m.startsWith("⚠") ? "rgba(204,94,34,0.08)" : "rgba(27,42,74,0.04)", color: m.startsWith("✓") ? C.olive : m.startsWith("⚠") ? C.orange : C.navy, animation: "fadeUp 0.3s ease" }}>
+                      {m}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {phase === "result" && archResult && (
+              <div style={{ animation: "fadeUp 0.6s ease" }}>
+                <div style={{ textAlign: "center", marginBottom: 36 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: C.gold, marginBottom: 8 }}>Tu Resultado</div>
+                  <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 700, color: C.navy, margin: "0 0 4px" }}>
+                    {answers.nombre ? `${answers.nombre}, eres...` : "Tu arquetipo es..."}
+                  </h1>
+                </div>
+
+                <ArchetypeCard archKey={archResult.primary} label="Arquetipo Primario" isMain />
+                <ArchetypeCard archKey={archResult.secondary} label="Arquetipo Secundario" />
+
+                {profile && (
+                  <>
+                    <div style={{ padding: "24px", borderRadius: 20, background: "rgba(27,42,74,0.03)", border: "1px solid rgba(27,42,74,0.06)", marginBottom: 16, animation: "cardIn 0.6s ease 0.2s both" }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: C.olive, marginBottom: 10 }}>Análisis Personalizado</div>
+                      <p style={{ fontSize: 15, lineHeight: 1.75, color: "rgba(27,42,74,0.75)", margin: 0 }}>{profile.resumen}</p>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+                      <div style={{ padding: "20px", borderRadius: 16, background: "rgba(122,148,85,0.06)", border: "1px solid rgba(122,148,85,0.12)", animation: "cardIn 0.6s ease 0.3s both" }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: C.olive, marginBottom: 10 }}>Fortalezas</div>
+                        {profile.fortalezas?.map((f, i) => (
+                          <div key={i} style={{ fontSize: 14, lineHeight: 1.6, color: C.navy, marginBottom: 4 }}>✦ {f}</div>
+                        ))}
+                      </div>
+                      <div style={{ padding: "20px", borderRadius: 16, background: "rgba(204,94,34,0.04)", border: "1px solid rgba(204,94,34,0.1)", animation: "cardIn 0.6s ease 0.4s both" }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: C.orange, marginBottom: 10 }}>Áreas de Trabajo</div>
+                        {profile.areas_trabajo?.map((a, i) => (
+                          <div key={i} style={{ fontSize: 14, lineHeight: 1.6, color: C.navy, marginBottom: 4 }}>→ {a}</div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ padding: "24px", borderRadius: 20, background: `linear-gradient(135deg, ${C.navy}08, ${C.gold}10)`, border: `1px solid ${C.gold}22`, marginBottom: 16, animation: "cardIn 0.6s ease 0.5s both" }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: C.gold, marginBottom: 10 }}>Mensaje para Ti</div>
+                      <p style={{ fontSize: 16, lineHeight: 1.75, color: C.navy, margin: 0, fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 600 }}>
+                        "{profile.mensaje_personal}"
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {/* Status */}
+                <div style={{ marginTop: 24, padding: "16px 20px", borderRadius: 14, background: "rgba(122,148,85,0.06)" }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: C.olive, marginBottom: 8 }}>Estado del envío</div>
+                  {statusMsgs.map((m, i) => (
+                    <div key={i} style={{ fontSize: 13, color: m.startsWith("✓") ? C.olive : m.startsWith("⚠") ? C.orange : C.navy, marginBottom: 3, fontWeight: 500 }}>{m}</div>
+                  ))}
+                </div>
+
+                <p style={{ textAlign: "center", fontSize: 13, color: "rgba(27,42,74,0.35)", marginTop: 28 }}>
+                  Mentes Abundantes — www.mentes-abundantes.com
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Nav */}
+      {phase !== "analyzing" && !isResult && (
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 10, background: "rgba(254,252,248,0.92)", backdropFilter: "blur(12px)", borderTop: "1px solid rgba(27,42,74,0.05)" }}>
+          <div style={{ maxWidth: 600, margin: "0 auto", padding: "16px 24px", display: "flex", justifyContent: "space-between" }}>
+            {step > 0 ? (
+              <button onClick={() => go(step - 1)} style={{ padding: "12px 24px", borderRadius: 12, border: "1.5px solid rgba(27,42,74,0.1)", background: "#fff", color: C.navy, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'Source Sans 3', sans-serif" }}>
+                ← Anterior
+              </button>
+            ) : <div />}
+            <button onClick={handleNext} disabled={!canProceed() || (isIntro && !answers.nombre)} style={{
+              padding: "12px 32px", borderRadius: 12, border: "none",
+              background: (canProceed() && (!isIntro || answers.nombre)) ? `linear-gradient(135deg, ${C.orange}, #d97033)` : "rgba(27,42,74,0.1)",
+              color: (canProceed() && (!isIntro || answers.nombre)) ? "#fff" : "rgba(27,42,74,0.3)",
+              fontSize: 15, fontWeight: 600, cursor: (canProceed() && (!isIntro || answers.nombre)) ? "pointer" : "not-allowed",
+              fontFamily: "'Source Sans 3', sans-serif",
+              boxShadow: (canProceed() && (!isIntro || answers.nombre)) ? "0 4px 16px rgba(204,94,34,0.25)" : "none",
+            }}>
+              {isIntro ? "Comenzar →" : step === SECTIONS.length - 2 ? "Ver mi resultado ✨" : "Siguiente →"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
