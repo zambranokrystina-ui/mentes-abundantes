@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mi Plan del Tiempo — Mentes Abundantes</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy:#152038; --orange:#D4762C; --cream:#F5E6C8; --olive:#8B9A5B;
+    --bg:#FAF6F0; --white:#FFFFFF; --dark:#2A2A2A; --muted:#6B7280; --line:#E7E1D6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--dark);
+    font-family:'Nunito Sans','Segoe UI',sans-serif; line-height:1.55; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:640px; margin:0 auto; padding:0 16px 60px;}
+
+  header{background:var(--navy); color:var(--white); padding:28px 22px 26px;
+    border-radius:0 0 22px 22px; position:relative; overflow:hidden; margin-bottom:22px;}
+  header .brand{color:var(--orange); font-weight:700; font-size:12px; letter-spacing:2px; text-transform:uppercase;}
+  header h1{margin:8px 0 4px; font-size:26px; font-weight:800; line-height:1.15;}
+  header .sub{color:var(--cream); font-size:14px; opacity:.9; font-style:italic;}
+  header .circle{position:absolute; border-radius:50%;}
+  header .c1{width:130px; height:130px; background:var(--orange); opacity:.12; top:-40px; right:-30px;}
+  header .c2{width:90px; height:90px; background:var(--olive); opacity:.16; bottom:-40px; right:60px;}
+
+  .intro{background:rgba(212,118,44,.08); border:1px solid rgba(212,118,44,.25);
+    border-radius:14px; padding:14px 16px; font-size:14px; color:var(--dark); margin-bottom:18px;}
+  .intro b{color:var(--navy);}
+
+  .card{background:var(--white); border:1px solid var(--line); border-radius:16px;
+    padding:18px 18px 16px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,.04);}
+  .card .step{display:inline-block; background:var(--cream); color:var(--navy);
+    font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+    padding:4px 10px; border-radius:8px; margin-bottom:10px;}
+  .card h2{margin:0 0 4px; font-size:18px; color:var(--navy); font-weight:800;}
+  .card p.hint{margin:0 0 12px; font-size:13px; color:var(--muted);}
+
+  label{display:block; font-size:13px; font-weight:700; color:var(--navy); margin:12px 0 6px;}
+  input[type="text"], input[type="email"], input[type="time"], textarea, select{
+    width:100%; border:1px solid var(--line); border-radius:11px; padding:12px 14px;
+    font-size:15px; font-family:inherit; color:var(--dark); background:var(--white);
+    outline:none; transition:border-color .15s; resize:vertical;}
+  input:focus, textarea:focus, select:focus{border-color:var(--orange);}
+  textarea{min-height:80px; line-height:1.5;}
+  .row2{display:flex; gap:10px; flex-wrap:wrap;}
+  .row2 .col{flex:1; min-width:140px;}
+  select{appearance:none;
+    background-image:url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'14'%20height%3D'8'%20viewBox%3D'0%200%2014%208'%3E%3Cpath%20fill%3D'%236B7280'%20d%3D'M0%200l7%207%207-7z'%2F%3E%3C%2Fsvg%3E");
+    background-repeat:no-repeat; background-position:right 14px center; padding-right:36px;}
+
+  .day{border:1px solid var(--line); border-radius:12px; padding:12px 12px 8px; margin-bottom:12px; background:#FCFAF6;}
+  .day .dname{font-size:14px; font-weight:800; color:var(--orange); margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .day .dot{width:8px; height:8px; border-radius:50%; background:var(--olive); display:inline-block;}
+  .day input{margin-bottom:8px;}
+  .day input:last-child{margin-bottom:0;}
+
+  .saved{text-align:center; font-size:12.5px; color:var(--olive); font-weight:700;
+    margin:6px 0 14px; min-height:18px; transition:opacity .3s;}
+
+  .submit{width:100%; padding:16px; border:none; border-radius:14px; background:var(--orange);
+    color:#fff; font-family:inherit; font-size:16px; font-weight:800; cursor:pointer;
+    box-shadow:0 4px 12px rgba(212,118,44,.3); transition:background .2s, transform .1s;}
+  .submit:active{transform:translateY(1px);}
+  .submit[disabled]{background:var(--olive); cursor:default; box-shadow:none;}
+
+  .status{text-align:center; font-size:14px; margin-top:12px; min-height:20px; font-weight:700;}
+  .status.ok{color:var(--olive);}
+  .status.err{color:#C0392B;}
+
+  .actions{text-align:center; margin-top:18px;}
+  .printlink{display:inline-block; color:var(--orange); font-weight:700; font-size:14px;
+    text-decoration:none; border:1px solid rgba(212,118,44,.4); border-radius:11px; padding:11px 20px; cursor:pointer;}
+  .tip{font-size:12px; color:var(--muted); margin-top:8px;}
+  footer{text-align:center; margin-top:24px; font-size:12px; color:var(--muted); font-style:italic;}
+
+  @media print{
+    body{background:#fff;}
+    header{border-radius:0; background:#fff !important; color:var(--navy); padding:0 0 12px;}
+    header .circle{display:none;} header h1{color:var(--navy);} header .sub{color:var(--muted);}
+    .intro, .saved, .actions, .submit, .status{display:none;}
+    .card, .day{box-shadow:none; break-inside:avoid; border-color:#ccc;}
+    input, textarea, select{border-color:#bbb;}
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="circle c1"></div><div class="circle c2"></div>
+    <div class="brand">Mentes Abundantes</div>
+    <h1>Mi Plan del Tiempo</h1>
+    <div class="sub">Menos, pero lo que importa &middot; Tu semana</div>
+  </header>
+
+  <div class="wrap">
+    <div class="intro">
+      Arma tu semana con el m&eacute;todo. <b>Se guarda solo</b> en este dispositivo mientras escribes.
+      Al terminar, dale <b>&ldquo;Enviar mi plan&rdquo;</b> y te llegar&aacute; una copia a tu correo. &#128140;
+    </div>
+
+    <div class="card">
+      <span class="step">Tus datos</span>
+      <h2>&iquest;Qui&eacute;n eres?</h2>
+      <div class="row2">
+        <div class="col">
+          <label for="nombre">Tu nombre</label>
+          <input type="text" id="nombre" placeholder="Nombre" />
+        </div>
+        <div class="col">
+          <label for="email">Tu correo</label>
+          <input type="email" id="email" placeholder="tucorreo@ejemplo.com" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="step">Paso 1 &middot; Diagn&oacute;stico</span>
+      <h2>Mi ladr&oacute;n principal</h2>
+      <p class="hint">&iquest;Cu&aacute;l te roba m&aacute;s tiempo? Reconocerlo ya es medio camino.</p>
+      <select id="ladron">
+        <option value="">Elige uno&hellip;</option>
+        <option>Lo urgente-no-importante (apagar incendios ajenos)</option>
+        <option>El "s&iacute;" autom&aacute;tico (decir que s&iacute; a todo)</option>
+        <option>La dispersi&oacute;n (saltar entre mil tareas sin terminar)</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <span class="step">Paso 2 &middot; Lo protejo</span>
+      <h2>Mi hora sagrada</h2>
+      <p class="hint">Un bloque al d&iacute;a, aunque sea de 30 min, solo para lo que m&aacute;s importa. No se toca.</p>
+      <div class="row2">
+        <div class="col">
+          <label for="hora">&iquest;A qu&eacute; hora?</label>
+          <input type="time" id="hora" />
+        </div>
+        <div class="col">
+          <label for="horaque">&iquest;Para qu&eacute;?</label>
+          <input type="text" id="horaque" placeholder="Ej: mi negocio, contenido&hellip;" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="step">Paso 3 &middot; Mi semana</span>
+      <h2>Mis 3 de cada d&iacute;a</h2>
+      <p class="hint">Solo 3 cosas s&iacute; o s&iacute; por d&iacute;a. Si las haces, el d&iacute;a fue un &eacute;xito.</p>
+
+      <div class="day">
+        <div class="dname"><span class="dot"></span>Lunes</div>
+        <input type="text" id="lun1" placeholder="1." />
+        <input type="text" id="lun2" placeholder="2." />
+        <input type="text" id="lun3" placeholder="3." />
+      </div>
+      <div class="day">
+        <div class="dname"><span class="dot"></span>Martes</div>
+        <input type="text" id="mar1" placeholder="1." />
+        <input type="text" id="mar2" placeholder="2." />
+        <input type="text" id="mar3" placeholder="3." />
+      </div>
+      <div class="day">
+        <div class="dname"><span class="dot"></span>Mi&eacute;rcoles</div>
+        <input type="text" id="mie1" placeholder="1." />
+        <input type="text" id="mie2" placeholder="2." />
+        <input type="text" id="mie3" placeholder="3." />
+      </div>
+      <div class="day">
+        <div class="dname"><span class="dot"></span>Jueves</div>
+        <input type="text" id="jue1" placeholder="1." />
+        <input type="text" id="jue2" placeholder="2." />
+        <input type="text" id="jue3" placeholder="3." />
+      </div>
+      <div class="day">
+        <div class="dname"><span class="dot"></span>Viernes</div>
+        <input type="text" id="vie1" placeholder="1." />
+        <input type="text" id="vie2" placeholder="2." />
+        <input type="text" id="vie3" placeholder="3." />
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="step">Paso 4 &middot; Lo guardo</span>
+      <h2>Mi lista de "no ahora"</h2>
+      <p class="hint">Todo lo que aparece y no es una de tus 3, va aqu&iacute;. No lo botas &mdash; lo guardas.</p>
+      <textarea id="noahora" placeholder="Anota aqu&iacute; lo que puede esperar&hellip;"></textarea>
+    </div>
+
+    <div class="card">
+      <span class="step">Paso 5 &middot; Lo protejo con la voz</span>
+      <h2>Un "ahora no" que dir&eacute;</h2>
+      <p class="hint">Proteger tu tiempo a veces es decir "ahora no", con cari&ntilde;o y firmeza.</p>
+      <input type="text" id="ahorano" placeholder="Ej: ahora no puedo, lo vemos el lunes&hellip;" />
+    </div>
+
+    <div class="saved" id="saved"></div>
+
+    <button class="submit" id="enviar">&#128140; Enviar mi plan</button>
+    <div class="status" id="status"></div>
+
+    <div class="actions">
+      <a class="printlink" onclick="window.print();return false;">&#128424;&#65039; Imprimir o guardar en PDF</a>
+      <div class="tip">Tambi&eacute;n puedes usar Ctrl/Cmd + P</div>
+    </div>
+
+    <footer>Mentes Abundantes &mdash; Tu Voz Antes que Tu Nicho</footer>
+  </div>
+
+<script>
+  /* ====== CONFIGURA AQUI ======
+     Pega la URL de tu Google Apps Script (termina en /exec).
+     Mientras este vacio, el boton guarda localmente pero no envia. */
+  var WEBHOOK_URL = "";
+  /* ============================ */
+
+  var KEY = 'plan_tiempo_ma_v2';
+  var fields = ['nombre','email','ladron','hora','horaque',
+    'lun1','lun2','lun3','mar1','mar2','mar3','mie1','mie2','mie3',
+    'jue1','jue2','jue3','vie1','vie2','vie3','noahora','ahorano'];
+
+  var savedEl = document.getElementById('saved');
+  var statusEl = document.getElementById('status');
+  var btn = document.getElementById('enviar');
+  var savedTimer;
+
+  function collect(){
+    var data = {};
+    fields.forEach(function(id){ var el = document.getElementById(id); if(el) data[id] = el.value; });
+    return data;
+  }
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY); if(!raw) return;
+      var data = JSON.parse(raw);
+      fields.forEach(function(id){ if(data[id] !== undefined){ var el = document.getElementById(id); if(el) el.value = data[id]; } });
+    }catch(e){}
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(collect())); flashSaved(); }catch(e){} }
+  function flashSaved(){
+    savedEl.textContent = '\u2713 Guardado en este dispositivo';
+    savedEl.style.opacity = '1';
+    clearTimeout(savedTimer);
+    savedTimer = setTimeout(function(){ savedEl.style.opacity = '0'; }, 1500);
+  }
+  fields.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){ el.addEventListener('input', save); el.addEventListener('change', save); }
+  });
+  function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  btn.addEventListener('click', function(){
+    var data = collect();
+    statusEl.className = 'status';
+    if(!data.nombre || !data.nombre.trim()){ statusEl.className='status err'; statusEl.textContent='Escribe tu nombre para enviarlo.'; return; }
+    if(!validEmail(data.email)){ statusEl.className='status err'; statusEl.textContent='Revisa tu correo, parece incompleto.'; return; }
+    if(!WEBHOOK_URL){ statusEl.className='status err'; statusEl.textContent='El envio aun no esta configurado. Tu plan quedo guardado en este dispositivo.'; return; }
+
+    btn.disabled = true; btn.textContent = 'Enviando\u2026'; statusEl.textContent = '';
+    data.enviado = new Date().toISOString();
+
+    fetch(WEBHOOK_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(data)
+    }).then(function(){
+      btn.disabled = false; btn.textContent = '\u2713 \u00a1Enviado!';
+      statusEl.className='status ok';
+      statusEl.textContent = '\u00a1Listo! Te llegara una copia a tu correo en un momento.';
+      setTimeout(function(){ btn.textContent = '\u{1F48C} Enviar mi plan'; }, 4000);
+    }).catch(function(){
+      btn.disabled = false; btn.textContent = '\u{1F48C} Enviar mi plan';
+      statusEl.className='status err';
+      statusEl.textContent = 'No se pudo enviar. Revisa tu conexion e intenta de nuevo (tu plan sigue guardado).';
+    });
+  });
+
+  load();
+</script>
+</body>
+</html>
