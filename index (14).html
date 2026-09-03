@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>El Espejo de Seis Meses · Mentes Abundantes</title>
+<meta name="description" content="Última tarea de Mentes Abundantes: mira dónde estabas cuando entraste y dónde estás hoy." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#FAF6F0}
+  body{font-family:'Nunito Sans','Segoe UI',system-ui,sans-serif;color:#2A2A2A;-webkit-text-size-adjust:100%}
+  input,textarea,button,select{font-family:inherit}
+  input[type=range]{accent-color:#D4762C;width:100%;height:28px}
+  textarea{resize:vertical}
+  button{-webkit-tap-highlight-color:transparent}
+  #boot{padding:60px 20px;text-align:center;color:#6B7280;font-size:14px}
+</style>
+</head>
+<body>
+<div id="root"><div id="boot">Cargando...</div></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+/* ══════════════════════════════════════════════════════════
+   ▼▼▼  LO ÚNICO QUE TIENES QUE CAMBIAR  ▼▼▼
+   Pega la URL que te da Apps Script al implementar.
+   Tiene que terminar en /exec
+   ══════════════════════════════════════════════════════════ */
+const WEBHOOK_URL = "PEGA_AQUI_TU_URL_DE_APPS_SCRIPT";
+const ADMIN_PASSWORD = "mentes2026";
+/* ══════════════════════════════════════════════════════════ */
+
+const B = {
+  navy:"#152038", orange:"#D4762C", cream:"#F5E6C8", olive:"#8B9A5B",
+  bg:"#FAF6F0", white:"#FFF", dark:"#2A2A2A", muted:"#6B7280", line:"#E5E7EB",
+};
+
+const MEMBERS = [
+  {id:"anahi",name:"Anahí"},
+  {id:"wanda",name:"Wanda Bonilla"},
+  {id:"arelis",name:"Arelis Rodríguez"},
+  {id:"liz",name:"Liz Jara"},
+  {id:"misladys",name:"Misladys"},
+  {id:"mimi",name:"Mimi Marianella"},
+  {id:"floredith",name:"Floredith"},
+  {id:"joanmirse",name:"Joanmirse Chacoa"},
+  {id:"ady",name:"Ady"},
+  {id:"luisandra",name:"Luisandra Rodríguez"},
+  {id:"desiree",name:"Desiree Castañeda"},
+  {id:"mayra",name:"Mayra"},
+];
+
+const DIMENSIONS = [
+  {id:"identidad",mes:"Mes 1",title:"Sé quién soy y qué represento",help:"Puedo decir en una frase qué me mueve, sin dudar y sin dar rodeos."},
+  {id:"creencias",mes:"Mes 2",title:"Tengo algo propio que decir",help:"Sé en qué creo y puedo defenderlo aunque otras personas piensen distinto."},
+  {id:"visibilidad",mes:"Mes 3",title:"Me muestro aunque me dé miedo",help:"Publico, hablo, aparezco. No siempre, pero ya no me escondo."},
+  {id:"comunidad",mes:"Mes 4",title:"Pido ayuda y me dejo acompañar",help:"No cargo sola. Sé a quién escribirle cuando algo no me sale."},
+  {id:"oferta",mes:"Mes 5",title:"Tengo claro lo que ofrezco",help:"Puedo explicar lo que hago —o lo que sé hacer— sin enredarme."},
+  {id:"merecimiento",mes:"Mes 5",title:"Siento que merezco recibir",help:"Digo mi precio (o el valor de mi tiempo) sin bajarlo ni disculparme."},
+  {id:"conversacion",mes:"Mes 5",title:"Sostengo una conversación de venta",help:"Pregunto, escucho, aguanto el silencio. No salgo corriendo."},
+  {id:"confianza",mes:"Mes 6",title:"Hablo de lo mío sin encogerme",help:"En una reunión, en una fiesta, en un mensaje. Con el cuerpo derecho."},
+];
+
+const SECTIONS = ["Evidencia","Tu voz","Lo que sigue"];
+
+const OPEN_QUESTIONS = [
+  {id:"hice",section:"Evidencia",q:"¿Qué hiciste en estos seis meses que NO habrías hecho hace seis meses?",help:"Algo concreto. Una publicación, una conversación, un precio que subiste, una persona a la que le escribiste.",ph:"Escribe una o dos cosas específicas..."},
+  {id:"incomodo",section:"Evidencia",q:"¿Cuál fue el momento más incómodo del programa, y qué aprendiste ahí?",help:"La incomodidad casi siempre marca dónde ocurrió el cambio real.",ph:"Escribe el momento y lo que te dejó..."},
+  {id:"numeros",section:"Evidencia",q:"Números y hechos, sin adornar.",help:"Publicaciones, conversaciones de venta, clientes nuevos, precio que ajustaste. Si algo quedó en cero, escribe cero — también es información.",ph:"Ej: 12 publicaciones · 4 conversaciones de venta · 1 clienta nueva"},
+  {id:"frase_antes",section:"Tu voz",q:"La frase que te decías en el mes 1.",help:"Esa que aparecía justo antes de publicar, de cobrar o de ofrecer.",ph:"Ej: “Todavía no soy tan buena”"},
+  {id:"frase_hoy",section:"Tu voz",q:"La frase que te dices hoy.",help:"Si todavía es la misma, escríbelo. Esto no es un examen.",ph:"Ej: “Ya recorrí este camino y puedo mostrarlo”"},
+  {id:"valor",section:"Tu voz",q:"Mi valor central hoy es:",help:"Una palabra. Puede ser la misma del mes 1 o puede haber cambiado.",ph:"Ej: Protección",short:true},
+  {id:"postura",section:"Tu voz",q:"Por eso, yo creo que:",help:"Tu postura. Lo que defiendes aunque incomode.",ph:"Ej: Ninguna familia debería tomar una decisión financiera con miedo..."},
+  {id:"contenido",section:"Tu voz",q:"Y eso lo digo así:",help:"El tipo de contenido o conversación con el que hoy lo comunicas.",ph:"Ej: Historias reales de familias a las que acompañé..."},
+  {id:"accion",section:"Lo que sigue",q:"Una acción no negociable para los próximos 90 días.",help:"Una sola. Concreta, medible, tuya. Si no la puedes contar, no sirve.",ph:"Ej: Publicar un video cada martes"},
+  {id:"soltar",section:"Lo que sigue",q:"¿Qué necesitas soltar para que eso ocurra?",help:"Una excusa, un hábito, una comparación, un permiso que estás esperando.",ph:"Escribe qué se queda atrás..."},
+  {id:"mensaje",section:"Lo que sigue",q:"Un mensaje para la mujer que entra al próximo grupo.",help:"Lo que te habría servido escuchar el primer día.",ph:"Escríbele directamente..."},
+];
+
+const EMPTY = () => {
+  const r = { ratings:{}, open:{} };
+  DIMENSIONS.forEach(d => r.ratings[d.id] = {antes:5, hoy:5});
+  OPEN_QUESTIONS.forEach(q => r.open[q.id] = "");
+  return r;
+};
+
+/* ── borrador local · puede estar bloqueado dentro de un iframe, por eso todo va en try ── */
+const LKEY = id => "espejo6:" + id;
+const mem = {};
+function saveLocal(id, data){
+  try{ localStorage.setItem(LKEY(id), JSON.stringify(data)); }catch(e){ mem[id]=data; }
+}
+function loadLocal(id){
+  try{ const v = localStorage.getItem(LKEY(id)); if(v) return JSON.parse(v); }catch(e){}
+  return mem[id] || null;
+}
+function loadDoneSet(){
+  const s = new Set();
+  MEMBERS.forEach(m => { const d = loadLocal(m.id); if(d && d.done) s.add(m.id); });
+  return s;
+}
+
+/* ── envío a Google Sheets ── */
+const WEBHOOK_OK = WEBHOOK_URL && WEBHOOK_URL.indexOf("PEGA_AQUI") !== 0;
+
+async function sendToSheet(member, data){
+  if(!WEBHOOK_OK) return {ok:false, reason:"sin-webhook"};
+  try{
+    const res = await fetch(WEBHOOK_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"text/plain;charset=utf-8" },
+      body: JSON.stringify({ action:"save", id:member.id, nombre:member.name, ratings:data.ratings, open:data.open }),
+    });
+    const j = await res.json();
+    return { ok: !!j.ok };
+  }catch(e){ return { ok:false, reason:"red" }; }
+}
+async function readAllFromSheet(pw){
+  if(!WEBHOOK_OK) return null;
+  try{
+    const res = await fetch(WEBHOOK_URL + "?action=all&pw=" + encodeURIComponent(pw));
+    const j = await res.json();
+    return j.ok ? j.data : null;
+  }catch(e){ return null; }
+}
+
+/* ── dentro de iframe: no hay scroll de página, se sube el contenedor ── */
+const IN_FRAME = (function(){ try{ return window.self !== window.top; }catch(e){ return true; } })();
+function toTop(){
+  try{
+    window.scrollTo(0,0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }catch(e){}
+}
+function postHeight(){
+  if(!IN_FRAME) return;
+  try{
+    const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({ type:"espejo:height", height:h }, "*");
+  }catch(e){}
+}
+
+/* ── UI ── */
+function Shell({children}){
+  return <div style={{maxWidth:660,margin:"0 auto",padding:"22px 16px 40px"}}>{children}</div>;
+}
+function Card({children,style}){
+  return <div style={{background:B.white,borderRadius:16,padding:20,border:"1px solid #F0EDE7",
+    boxShadow:"0 1px 4px rgba(21,32,56,0.05)",marginBottom:16,...style}}>{children}</div>;
+}
+function Eyebrow({children,color}){
+  return <div style={{fontSize:11,fontWeight:800,letterSpacing:1.6,textTransform:"uppercase",
+    color:color||B.orange,marginBottom:8}}>{children}</div>;
+}
+function Header({showBack,onBack,onLogoTap}){
+  return (
+    <div style={{background:B.navy,padding:"14px 18px",display:"flex",alignItems:"center",gap:10}}>
+      {showBack && (
+        <button onClick={onBack} aria-label="Volver" style={{background:"rgba(255,255,255,.12)",border:"none",
+          color:B.cream,fontSize:17,cursor:"pointer",width:32,height:32,borderRadius:8,lineHeight:1}}>←</button>
+      )}
+      <div onClick={onLogoTap}>
+        <div style={{color:B.orange,fontWeight:800,fontSize:14,letterSpacing:1.4}}>MENTES ABUNDANTES</div>
+        <div style={{color:B.cream,fontSize:10.5,opacity:.75,marginTop:1}}>Cierre de programa · El Espejo de Seis Meses</div>
+      </div>
+    </div>
+  );
+}
+function JumpTrack({antes,hoy,label,compact}){
+  const min=Math.min(antes,hoy), max=Math.max(antes,hoy);
+  const left=((min-1)/9)*100, width=((max-min)/9)*100;
+  const col = hoy>=antes ? B.orange : B.muted;
+  return (
+    <div style={{marginBottom:compact?14:20}}>
+      {label && (
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:7,gap:10}}>
+          <span style={{fontSize:13.5,fontWeight:700,color:B.navy,lineHeight:1.35}}>{label}</span>
+          <span style={{fontSize:12,fontWeight:800,color:col,whiteSpace:"nowrap"}}>{antes} → {hoy}</span>
+        </div>
+      )}
+      <div style={{position:"relative",height:22}}>
+        <div style={{position:"absolute",top:9,left:0,right:0,height:4,background:B.line,borderRadius:2}}/>
+        <div style={{position:"absolute",top:9,left:left+"%",width:width+"%",height:4,background:col,borderRadius:2}}/>
+        <div style={{position:"absolute",top:4,left:"calc("+(((antes-1)/9)*100)+"% - 7px)",width:14,height:14,
+          borderRadius:"50%",background:B.white,border:"2.5px solid "+B.muted}}/>
+        <div style={{position:"absolute",top:2,left:"calc("+(((hoy-1)/9)*100)+"% - 9px)",width:18,height:18,
+          borderRadius:"50%",background:col,border:"3px solid "+B.white,boxShadow:"0 0 0 1.5px "+col}}/>
+      </div>
+    </div>
+  );
+}
+const inputBase = {width:"100%",border:"1px solid "+B.line,borderRadius:10,padding:"11px 13px",
+  fontSize:16,lineHeight:1.6,outline:"none",background:B.white,color:B.dark};
+
+function RatingRow({dim,value,onChange}){
+  return (
+    <div style={{paddingBottom:18,marginBottom:18,borderBottom:"1px solid #F2F0EA"}}>
+      <div style={{display:"flex",gap:8,alignItems:"baseline",marginBottom:3}}>
+        <span style={{fontSize:10,fontWeight:800,color:B.olive,letterSpacing:.8,textTransform:"uppercase",flexShrink:0}}>{dim.mes}</span>
+        <span style={{fontSize:15,fontWeight:700,color:B.navy,lineHeight:1.35}}>{dim.title}</span>
+      </div>
+      <p style={{fontSize:12.5,color:B.muted,margin:"0 0 14px",lineHeight:1.5}}>{dim.help}</p>
+      <div style={{display:"grid",gap:12}}>
+        <div>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
+            <span style={{fontSize:12,fontWeight:700,color:B.muted}}>Cuando empecé</span>
+            <span style={{fontSize:15,fontWeight:800,color:B.muted}}>{value.antes}</span>
+          </div>
+          <input type="range" min="1" max="10" step="1" value={value.antes}
+            onChange={e=>onChange({...value,antes:Number(e.target.value)})} style={{accentColor:B.muted}}/>
+        </div>
+        <div>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
+            <span style={{fontSize:12,fontWeight:700,color:B.orange}}>Hoy</span>
+            <span style={{fontSize:15,fontWeight:800,color:B.orange}}>{value.hoy}</span>
+          </div>
+          <input type="range" min="1" max="10" step="1" value={value.hoy}
+            onChange={e=>onChange({...value,hoy:Number(e.target.value)})} style={{accentColor:B.orange}}/>
+        </div>
+      </div>
+    </div>
+  );
+}
+function OpenRow({q,value,onChange}){
+  return (
+    <div style={{marginBottom:22}}>
+      <p style={{fontSize:14.5,fontWeight:700,color:B.navy,margin:"0 0 4px",lineHeight:1.45}}>{q.q}</p>
+      <p style={{fontSize:12.5,color:B.muted,margin:"0 0 9px",lineHeight:1.5}}>{q.help}</p>
+      {q.short
+        ? <input style={inputBase} value={value} placeholder={q.ph} onChange={e=>onChange(e.target.value)}/>
+        : <textarea style={{...inputBase,minHeight:88}} value={value} placeholder={q.ph} onChange={e=>onChange(e.target.value)}/>}
+    </div>
+  );
+}
+
+function SelectScreen({onSelect,done}){
+  return (
+    <Shell>
+      <div style={{marginBottom:22}}>
+        <Eyebrow>Última tarea del programa</Eyebrow>
+        <h1 style={{fontSize:27,color:B.navy,fontWeight:800,margin:"0 0 10px",lineHeight:1.2}}>El Espejo de Seis Meses</h1>
+        <p style={{fontSize:14.5,margin:0,lineHeight:1.65}}>
+          No es una evaluación y nadie te va a calificar. Es un espejo: vas a mirar dónde estabas
+          cuando entraste y dónde estás hoy, con tus propias palabras. Lo que escribas aquí lo vamos
+          a usar en la última clase.
+        </p>
+      </div>
+      <div style={{background:B.cream,borderRadius:14,padding:"14px 16px",marginBottom:22}}>
+        <p style={{fontSize:13,color:B.navy,margin:0,lineHeight:1.6,fontWeight:600}}>
+          Sé honesta, sobre todo con el "antes". Si te lo pintas mejor de lo que era, te robas tu propio avance.
+        </p>
+      </div>
+      <div style={{fontSize:12,fontWeight:800,color:B.muted,letterSpacing:1.2,marginBottom:10}}>SELECCIONA TU NOMBRE</div>
+      <div style={{display:"grid",gap:9}}>
+        {MEMBERS.map(m=>(
+          <button key={m.id} onClick={()=>onSelect(m)} style={{width:"100%",textAlign:"left",background:B.white,
+            border:"1px solid "+(done.has(m.id)?B.olive:"#EDEAE3"),borderRadius:12,padding:"15px 18px",cursor:"pointer",
+            display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{fontWeight:700,fontSize:15.5,color:B.navy}}>{m.name}</span>
+            {done.has(m.id)
+              ? <span style={{fontSize:10.5,color:B.white,background:B.olive,padding:"3px 9px",borderRadius:20,fontWeight:700}}>Enviada</span>
+              : <span style={{fontSize:15,color:B.line}}>→</span>}
+          </button>
+        ))}
+      </div>
+      <p style={{fontSize:12.5,color:B.muted,textAlign:"center",marginTop:26,lineHeight:1.6}}>
+        Tarda unos 15 minutos. Llénala de una sola vez si puedes.
+      </p>
+    </Shell>
+  );
+}
+
+function AssessScreen({member,onFinish}){
+  const [data,setData]=useState(()=>{
+    const l=loadLocal(member.id);
+    return l ? {...EMPTY(),...l,ratings:{...EMPTY().ratings,...l.ratings},open:{...EMPTY().open,...l.open}} : EMPTY();
+  });
+  const [step,setStep]=useState(0);
+  const [sending,setSending]=useState(false);
+  const [err,setErr]=useState("");
+
+  useEffect(()=>{ saveLocal(member.id,data); },[data,member.id]);
+
+  const total = 1 + SECTIONS.length;
+  const isLast = step === total-1;
+
+  const next = async ()=>{
+    if(!isLast){ setStep(step+1); toTop(); return; }
+    setSending(true); setErr("");
+    const r = await sendToSheet(member,data);
+    setSending(false);
+    if(r.ok){
+      const d = {...data,done:true};
+      setData(d); saveLocal(member.id,d);
+      onFinish(d);
+    } else {
+      setErr(r.reason==="sin-webhook"
+        ? "La app todavía no está conectada. Avísale a Krystina."
+        : "No se pudo enviar. Revisa tu internet e intenta otra vez — no cierres esta pantalla.");
+    }
+  };
+
+  return (
+    <Shell>
+      <div style={{display:"flex",gap:5,marginBottom:18}}>
+        {Array.from({length:total}).map((_,i)=>(
+          <div key={i} style={{flex:1,height:4,borderRadius:2,background:i<=step?B.orange:B.line}}/>
+        ))}
+      </div>
+      <div style={{marginBottom:18}}>
+        <Eyebrow>{member.name}</Eyebrow>
+        <h2 style={{fontSize:21,fontWeight:800,color:B.navy,margin:0,lineHeight:1.25}}>
+          {step===0 ? "Dónde estabas, dónde estás" : SECTIONS[step-1]}
+        </h2>
+      </div>
+
+      {step===0 && (
+        <Card>
+          <p style={{fontSize:13.5,margin:"0 0 20px",lineHeight:1.65}}>
+            Ocho afirmaciones. Para cada una, mueve dos veces: primero dónde estabas cuando empezaste,
+            después dónde estás hoy. 1 es "nada", 10 es "totalmente".
+          </p>
+          {DIMENSIONS.map(d=>(
+            <RatingRow key={d.id} dim={d} value={data.ratings[d.id]}
+              onChange={v=>setData(p=>({...p,ratings:{...p.ratings,[d.id]:v}}))}/>
+          ))}
+        </Card>
+      )}
+      {step>0 && (
+        <Card>
+          {OPEN_QUESTIONS.filter(q=>q.section===SECTIONS[step-1]).map(q=>(
+            <OpenRow key={q.id} q={q} value={data.open[q.id]}
+              onChange={v=>setData(p=>({...p,open:{...p.open,[q.id]:v}}))}/>
+          ))}
+        </Card>
+      )}
+
+      {err && (
+        <div style={{background:"#FEF2F2",border:"1px solid #FECACA",borderRadius:12,padding:"12px 14px",marginBottom:14}}>
+          <p style={{fontSize:13,color:"#DC2626",margin:0,lineHeight:1.6}}>{err}</p>
+        </div>
+      )}
+
+      <div style={{display:"flex",gap:10,marginTop:4}}>
+        {step>0 && (
+          <button onClick={()=>{setStep(step-1);toTop();}} style={{padding:"15px 20px",borderRadius:13,
+            border:"1px solid "+B.line,background:B.white,color:B.muted,fontWeight:700,fontSize:14,cursor:"pointer"}}>Atrás</button>
+        )}
+        <button onClick={next} disabled={sending} style={{flex:1,padding:"15px",borderRadius:13,border:"none",
+          fontWeight:800,fontSize:15.5,cursor:sending?"wait":"pointer",background:B.orange,color:B.white,
+          boxShadow:"0 4px 14px rgba(212,118,44,.28)"}}>
+          {sending ? "Enviando..." : isLast ? "Enviar y ver mi espejo" : "Continuar"}
+        </button>
+      </div>
+    </Shell>
+  );
+}
+
+function ResultScreen({member,data,onBack}){
+  const jumps = DIMENSIONS.map(d=>({dim:d,...data.ratings[d.id],delta:data.ratings[d.id].hoy-data.ratings[d.id].antes}));
+  const aA = jumps.reduce((s,j)=>s+j.antes,0)/jumps.length;
+  const aH = jumps.reduce((s,j)=>s+j.hoy,0)/jumps.length;
+  const sorted=[...jumps].sort((a,b)=>b.delta-a.delta);
+  const big=sorted[0], small=sorted[sorted.length-1];
+  return (
+    <Shell>
+      <div style={{background:B.navy,borderRadius:18,padding:"26px 22px",marginBottom:18}}>
+        <Eyebrow color={B.orange}>Tu espejo · {member.name}</Eyebrow>
+        <div style={{display:"flex",alignItems:"flex-end",gap:14,marginTop:12}}>
+          <div>
+            <div style={{fontSize:11,color:B.cream,opacity:.7,fontWeight:700,letterSpacing:1}}>MES 1</div>
+            <div style={{fontSize:40,fontWeight:800,color:"rgba(245,230,200,.55)",lineHeight:1}}>{aA.toFixed(1)}</div>
+          </div>
+          <div style={{fontSize:26,color:B.orange,paddingBottom:4}}>→</div>
+          <div>
+            <div style={{fontSize:11,color:B.orange,fontWeight:700,letterSpacing:1}}>HOY</div>
+            <div style={{fontSize:46,fontWeight:800,color:B.orange,lineHeight:1}}>{aH.toFixed(1)}</div>
+          </div>
+        </div>
+        <p style={{fontSize:13.5,color:B.cream,margin:"16px 0 0",lineHeight:1.65,opacity:.92}}>
+          {aH-aA>=2 ? "Ese espacio entre los dos números es tuyo. No te lo regaló nadie: lo caminaste."
+           : aH-aA>0 ? "El salto puede parecerte pequeño. Míralo otra vez dentro de tres meses, cuando la acción que escribiste ya lleve rodando un tiempo."
+           : "Que los números no se muevan también dice algo. Llévalo a la última clase — vale la pena mirarlo entre todas."}
+        </p>
+      </div>
+
+      <Card>
+        <Eyebrow>Dimensión por dimensión</Eyebrow>
+        <div style={{marginTop:14}}>
+          {jumps.map(j=><JumpTrack key={j.dim.id} antes={j.antes} hoy={j.hoy} label={j.dim.title}/>)}
+        </div>
+      </Card>
+
+      <Card style={{background:"rgba(139,154,91,.08)",border:"1px solid rgba(139,154,91,.25)"}}>
+        <Eyebrow color={B.olive}>Lo que salta a la vista</Eyebrow>
+        <p style={{fontSize:14,margin:"8px 0 10px",lineHeight:1.65}}>
+          Donde más te moviste: <strong style={{color:B.navy}}>{big.dim.title.toLowerCase()}</strong>
+          {big.delta>0 ? " ("+big.delta+" puntos)." : "."}
+        </p>
+        <p style={{fontSize:14,margin:0,lineHeight:1.65}}>
+          Donde queda camino: <strong style={{color:B.navy}}>{small.dim.title.toLowerCase()}</strong>. Eso no es un fallo
+          del programa ni tuyo — es tu punto de partida para los próximos 90 días.
+        </p>
+      </Card>
+
+      {(data.open.frase_antes||data.open.frase_hoy) && (
+        <Card>
+          <Eyebrow>Tu voz cambió así</Eyebrow>
+          <div style={{marginTop:12}}>
+            <div style={{fontSize:11,fontWeight:800,color:B.muted,letterSpacing:1}}>ANTES</div>
+            <p style={{fontSize:16,color:B.muted,margin:"4px 0 16px",lineHeight:1.55,fontStyle:"italic"}}>{data.open.frase_antes||"—"}</p>
+            <div style={{fontSize:11,fontWeight:800,color:B.orange,letterSpacing:1}}>HOY</div>
+            <p style={{fontSize:17,color:B.navy,margin:"4px 0 0",lineHeight:1.55,fontWeight:700}}>{data.open.frase_hoy||"—"}</p>
+          </div>
+        </Card>
+      )}
+
+      {data.open.accion && (
+        <Card style={{background:B.cream,border:"none"}}>
+          <Eyebrow color={B.navy}>Tu no negociable · próximos 90 días</Eyebrow>
+          <p style={{fontSize:16,color:B.navy,margin:"8px 0 0",lineHeight:1.55,fontWeight:700}}>{data.open.accion}</p>
+        </Card>
+      )}
+
+      <div style={{textAlign:"center",marginTop:24}}>
+        <p style={{fontSize:13,color:B.muted,margin:"0 0 16px",lineHeight:1.6}}>
+          Tus respuestas quedaron enviadas. Trae este espejo a la última clase.
+        </p>
+        <button onClick={onBack} style={{padding:"13px 26px",borderRadius:12,border:"1px solid "+B.line,
+          background:B.white,color:B.navy,fontSize:14,fontWeight:700,cursor:"pointer"}}>Volver al inicio</button>
+      </div>
+    </Shell>
+  );
+}
+
+function AdminScreen(){
+  const [pw,setPw]=useState(""); const [unlocked,setUnlocked]=useState(false);
+  const [all,setAll]=useState(null); const [loading,setLoading]=useState(false);
+  const [open,setOpen]=useState(null); const [err,setErr]=useState("");
+
+  const enter = async ()=>{
+    if(pw!==ADMIN_PASSWORD){ setErr("Esa contraseña no es."); return; }
+    setUnlocked(true); setLoading(true);
+    const d = await readAllFromSheet(pw);
+    setAll(d||{}); setLoading(false);
+  };
+
+  if(!unlocked) return (
+    <Shell>
+      <Card style={{marginTop:40}}>
+        <Eyebrow>Acceso de facilitación</Eyebrow>
+        <p style={{fontSize:14,margin:"8px 0 16px",lineHeight:1.6}}>Este panel muestra las respuestas de todo el grupo.</p>
+        <input type="password" value={pw} placeholder="Contraseña" style={inputBase}
+          onChange={e=>{setPw(e.target.value);setErr("");}}
+          onKeyDown={e=>{if(e.key==="Enter")enter();}}/>
+        {err && <p style={{fontSize:13,color:"#DC2626",margin:"8px 0 0"}}>{err}</p>}
+        <button onClick={enter} style={{width:"100%",marginTop:14,padding:13,borderRadius:12,border:"none",
+          background:B.navy,color:B.white,fontWeight:700,fontSize:14.5,cursor:"pointer"}}>Entrar</button>
+      </Card>
+    </Shell>
+  );
+
+  if(loading) return <Shell><p style={{textAlign:"center",color:B.muted,padding:40}}>Cargando respuestas...</p></Shell>;
+
+  const ids = Object.keys(all||{});
+  const n = ids.length;
+  const gAvg = which => {
+    if(!n) return 0;
+    let t=0; ids.forEach(id=>DIMENSIONS.forEach(d=>{ t += (all[id].ratings && all[id].ratings[d.id] ? all[id].ratings[d.id][which] : 0)||0; }));
+    return t/(n*DIMENSIONS.length);
+  };
+  const dAvg = (dimId,which) => n ? ids.reduce((s,id)=>s+((all[id].ratings && all[id].ratings[dimId] ? all[id].ratings[dimId][which] : 0)||0),0)/n : 0;
+
+  return (
+    <Shell>
+      <div style={{marginBottom:18}}>
+        <Eyebrow>Panel de facilitación</Eyebrow>
+        <h2 style={{fontSize:21,fontWeight:800,color:B.navy,margin:"0 0 6px"}}>{n} de {MEMBERS.length} respondieron</h2>
+        <div style={{height:6,background:B.line,borderRadius:3,overflow:"hidden"}}>
+          <div style={{height:"100%",width:((n/MEMBERS.length)*100)+"%",background:B.olive,borderRadius:3}}/>
+        </div>
+      </div>
+
+      {n>0 && (
+        <Card style={{background:B.navy,border:"none"}}>
+          <Eyebrow color={B.orange}>El salto del grupo</Eyebrow>
+          <div style={{display:"flex",alignItems:"flex-end",gap:12,margin:"12px 0 6px"}}>
+            <div style={{fontSize:32,fontWeight:800,color:"rgba(245,230,200,.5)",lineHeight:1}}>{gAvg("antes").toFixed(1)}</div>
+            <div style={{fontSize:20,color:B.orange,paddingBottom:3}}>→</div>
+            <div style={{fontSize:38,fontWeight:800,color:B.orange,lineHeight:1}}>{gAvg("hoy").toFixed(1)}</div>
+          </div>
+          <p style={{fontSize:12.5,color:B.cream,opacity:.8,margin:0}}>Promedio de las ocho dimensiones, {n} respuestas.</p>
+        </Card>
+      )}
+
+      {n>0 && (
+        <Card>
+          <Eyebrow>Promedio del grupo por dimensión</Eyebrow>
+          <div style={{marginTop:14}}>
+            {DIMENSIONS.map(d=>(
+              <JumpTrack key={d.id} antes={Math.round(dAvg(d.id,"antes"))} hoy={Math.round(dAvg(d.id,"hoy"))} label={d.title} compact/>
+            ))}
+          </div>
+          <p style={{fontSize:12,color:B.muted,margin:"10px 0 0",lineHeight:1.55}}>
+            Las dimensiones con menos salto son las candidatas naturales para el próximo grupo.
+          </p>
+        </Card>
+      )}
+
+      {MEMBERS.map(m=>{
+        const d = all && all[m.id];
+        const isOpen = open===m.id;
+        return (
+          <div key={m.id} style={{marginBottom:9,borderRadius:12,overflow:"hidden",
+            border:"1px solid "+(d?"rgba(139,154,91,.45)":"#EDEAE3")}}>
+            <button onClick={()=>setOpen(isOpen?null:m.id)} style={{width:"100%",display:"flex",
+              justifyContent:"space-between",alignItems:"center",background:d?"rgba(139,154,91,.07)":B.white,
+              border:"none",padding:"14px 16px",cursor:"pointer",textAlign:"left"}}>
+              <span style={{fontWeight:700,fontSize:14.5,color:B.navy}}>{m.name}</span>
+              <span style={{fontSize:11,color:d?B.olive:B.muted,fontWeight:700}}>{d?"Enviada":"Pendiente"}</span>
+            </button>
+            {isOpen && d && (
+              <div style={{padding:16,background:B.white,borderTop:"1px solid #F2F0EA"}}>
+                {DIMENSIONS.map(dim=>(
+                  <JumpTrack key={dim.id}
+                    antes={(d.ratings && d.ratings[dim.id] ? d.ratings[dim.id].antes : 1)||1}
+                    hoy={(d.ratings && d.ratings[dim.id] ? d.ratings[dim.id].hoy : 1)||1}
+                    label={dim.title} compact/>
+                ))}
+                <div style={{marginTop:14}}>
+                  {OPEN_QUESTIONS.map(q=> (d.open && d.open[q.id]) ? (
+                    <div key={q.id} style={{marginBottom:13}}>
+                      <div style={{fontSize:11,color:B.orange,fontWeight:800,marginBottom:3}}>{q.q}</div>
+                      <div style={{fontSize:13.5,background:B.bg,padding:"9px 11px",borderRadius:8,lineHeight:1.6}}>{d.open[q.id]}</div>
+                    </div>
+                  ) : null)}
+                </div>
+              </div>
+            )}
+            {isOpen && !d && (
+              <div style={{padding:18,background:B.white,borderTop:"1px solid #F2F0EA"}}>
+                <p style={{fontSize:13.5,color:B.muted,margin:0}}>Todavía no ha enviado su espejo.</p>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </Shell>
+  );
+}
+
+function App(){
+  const [screen,setScreen]=useState(()=>{
+    try{
+      const h=(window.location.hash||"").toLowerCase();
+      const q=(window.location.search||"").toLowerCase();
+      if(h.indexOf("panel")>-1 || q.indexOf("panel")>-1) return "admin";
+    }catch(e){}
+    return "select";
+  });
+  const [member,setMember]=useState(null);
+  const [result,setResult]=useState(null);
+  const [done,setDone]=useState(()=>loadDoneSet());
+  const taps=useRef(0);
+
+  useEffect(()=>{ postHeight(); });
+
+  const home=()=>{ setScreen("select"); setMember(null); setResult(null); setDone(loadDoneSet()); toTop(); };
+
+  return (
+    <div style={{minHeight:IN_FRAME?"auto":"100vh"}}>
+      <Header showBack={screen!=="select"} onBack={home}
+        onLogoTap={()=>{ if(screen!=="select")return; taps.current++; if(taps.current>=5){taps.current=0;setScreen("admin");} }}/>
+      {screen==="select" && <SelectScreen done={done} onSelect={m=>{setMember(m);setScreen("assess");toTop();}}/>}
+      {screen==="assess" && member && <AssessScreen member={member} onFinish={d=>{setResult(d);setScreen("result");toTop();}}/>}
+      {screen==="result" && member && result && <ResultScreen member={member} data={result} onBack={home}/>}
+      {screen==="admin" && <AdminScreen/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
